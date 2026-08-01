@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Scientific Calculator</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e0e5ec; /* Light grey background */
+        }
+
+        /* Calculator Body (Physical Look) */
+        .calculator {
+            background-color: #2b2b2b; /* Dark grey */
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 15px 15px 30px rgba(0,0,0,0.4), 
+                        inset 2px 2px 5px rgba(255,255,255,0.1);
+            width: 360px;
+        }
+
+        /* Brand Name */
+        .brand {
+            color: #ccc;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Real LCD Screen Look */
+        .lcd-screen {
+            width: 100%;
+            height: 80px;
+            background-color: #9ea786; /* Classic LCD Green */
+            border: 3px solid #1a1a1a;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: right;
+            padding: 15px 10px;
+            font-size: 32px;
+            color: #111;
+            font-family: 'Courier New', Courier, monospace; /* Digital Font Feel */
+            font-weight: bold;
+            box-shadow: inset 2px 2px 10px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        /* Buttons Grid */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        /* Common Button Style */
+        button {
+            height: 45px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px #1a1a1a;
+            transition: 0.1s;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px #1a1a1a;
+        }
+
+        /* Scientific Buttons (Top Rows) */
+        .btn-sci {
+            background-color: #3d3d3d;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        /* Normal Number Buttons */
+        .btn-num {
+            background-color: #e0e0e0;
+            color: #000;
+            font-size: 18px;
+        }
+
+        /* Operator Buttons (+, -, *, /) */
+        .btn-op {
+            background-color: #5a5a5a;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        /* Clear & Delete (Orange/Red) */
+        .btn-clear {
+            background-color: #d35400;
+            color: white;
+            box-shadow: 0 4px #a04000;
+        }
+
+        /* Equal Button (Blue) */
+        .btn-equal {
+            background-color: #2980b9;
+            color: white;
+            box-shadow: 0 4px #1c5981;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <div class="brand">PRO MATH - 991EX</div>
+        
+        <!-- LCD Display -->
+        <input type="text" id="display" class="lcd-screen" disabled placeholder="0">
+        
+        <div class="buttons">
+            <!-- Row 1: Advanced Math -->
+            <button class="btn-sci" onclick="appendFunction('sin(')">sin</button>
+            <button class="btn-sci" onclick="appendFunction('cos(')">cos</button>
+            <button class="btn-sci" onclick="appendFunction('tan(')">tan</button>
+            <button class="btn-sci" onclick="appendFunction('log(')">log</button>
+            <button class="btn-sci" onclick="appendFunction('ln(')">ln</button>
+
+            <!-- Row 2: Powers & Roots -->
+            <button class="btn-sci" onclick="appendFunction('√(')">√</button>
+            <button class="btn-sci" onclick="appendValue('^2')">x²</button>
+            <button class="btn-sci" onclick="appendValue('^')">xʸ</button>
+            <button class="btn-sci" onclick="appendValue('(')">(</button>
+            <button class="btn-sci" onclick="appendValue(')')">)</button>
+
+            <!-- Row 3: Numbers & Basic Actions -->
+            <button class="btn-num" onclick="appendValue('7')">7</button>
+            <button class="btn-num" onclick="appendValue('8')">8</button>
+            <button class="btn-num" onclick="appendValue('9')">9</button>
+            <button class="btn-clear" onclick="deleteLast()">DEL</button>
+            <button class="btn-clear" onclick="clearDisplay()">AC</button>
+
+            <!-- Row 4 -->
+            <button class="btn-num" onclick="appendValue('4')">4</button>
+            <button class="btn-num" onclick="appendValue('5')">5</button>
+            <button class="btn-num" onclick="appendValue('6')">6</button>
+            <button class="btn-op" onclick="appendValue('×')">×</button>
+            <button class="btn-op" onclick="appendValue('÷')">÷</button>
+
+            <!-- Row 5 -->
+            <button class="btn-num" onclick="appendValue('1')">1</button>
+            <button class="btn-num" onclick="appendValue('2')">2</button>
+            <button class="btn-num" onclick="appendValue('3')">3</button>
+            <button class="btn-op" onclick="appendValue('+')">+</button>
+            <button class="btn-op" onclick="appendValue('-')">-</button>
+
+            <!-- Row 6 -->
+            <button class="btn-num" onclick="appendValue('0')">0</button>
+            <button class="btn-num" onclick="appendValue('.')">.</button>
+            <button class="btn-sci" onclick="appendValue('π')">π</button>
+            <button class="btn-sci" onclick="appendValue('e')">e</button>
+            <button class="btn-equal" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+
+        // Number aur symbols ko screen par dikhane ke liye
+        function appendValue(value) {
+            display.value += value;
+        }
+
+        // Functions (sin, cos, etc) ko screen par dikhane ke liye
+        function appendFunction(func) {
+            display.value += func;
+        }
+
+        // AC (All Clear) button
+        function clearDisplay() {
+            display.value = '';
+        }
+
+        // DEL button
+        function deleteLast() {
+            display.value = display.value.slice(0, -1);
+        }
+
+        // Final Calculation Logic
+        function calculate() {
+            let expr = display.value;
+
+            if (expr === '') return;
+
+            // Visual symbols ko JavaScript format mein badalna
+            expr = expr.replace(/×/g, '*');
+            expr = expr.replace(/÷/g, '/');
+            expr = expr.replace(/π/g, 'Math.PI');
+            expr = expr.replace(/e/g, 'Math.E');
+            expr = expr.replace(/\^2/g, '**2');
+            expr = expr.replace(/\^/g, '**');
+            
+            // Scientific math functions ko JS format mein replace karna
+            expr = expr.replace(/sin\(/g, 'Math.sin(');
+            expr = expr.replace(/cos\(/g, 'Math.cos(');
+            expr = expr.replace(/tan\(/g, 'Math.tan(');
+            expr = expr.replace(/log\(/g, 'Math.log10(');
+            expr = expr.replace(/ln\(/g, 'Math.log(');
+            expr = expr.replace(/√\(/g, 'Math.sqrt(');
+
+            try {
+                // Calculate karna
+                let result = eval(expr);
+
+                // Agar decimal bohot bada hai toh usko fix karna (jaise 3.14159265)
+                if(result % 1 !== 0) {
+                    result = parseFloat(result.toFixed(8));
+                }
+                
+                display.value = result;
+            } catch (error) {
+                display.value = 'Syntax Error';
+                setTimeout(() => {
+                    if(display.value === 'Syntax Error') clearDisplay();
+                }, 1500);
+            }
+        }
+    </script>
+
+</body>
+</html>
